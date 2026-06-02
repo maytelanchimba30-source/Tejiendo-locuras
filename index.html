@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tejiendo Locuras | Tienda Oficial</title>
+    <style>
+        :root {
+            --negro: #1a1a1a;
+            --gris-claro: #f5f5f7;
+            --lila-suave: #f3e5f5;
+            --menta: #e8f5e9;
+            --oro: #ffcc00;
+        }
+
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; background: #fff; color: var(--negro); }
+
+        /* --- Animación de Estambre --- */
+        .yarn-ball { position: fixed; font-size: 2rem; z-index: -1; animation: float 12s linear infinite; opacity: 0.4; }
+        @keyframes float { 0% { transform: translateY(110vh) rotate(0deg); } 100% { transform: translateY(-10vh) rotate(360deg); } }
+
+        /* --- Cabecera Estilo Bershka --- */
+        header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px 5%; border-bottom: 1px solid #eee; position: sticky; top: 0; background: white; z-index: 1000; 
+        }
+        .logo { font-size: 22px; font-weight: bold; letter-spacing: 2px; color: var(--negro); text-decoration: none; }
+        .nav-right { display: flex; gap: 20px; }
+        .nav-btn { background: none; border: none; font-size: 12px; font-weight: 600; text-transform: uppercase; cursor: pointer; }
+
+        /* --- Layout: Menú Lateral + Productos --- */
+        .main-content { display: grid; grid-template-columns: 250px 1fr; gap: 30px; padding: 40px 5%; }
+
+        .sidebar h3 { font-size: 13px; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+        .filter-list { list-style: none; padding: 0; }
+        .filter-list li { padding: 8px 0; font-size: 13px; color: #666; cursor: pointer; transition: 0.2s; }
+        .filter-list li:hover { color: var(--negro); font-weight: bold; }
+
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; }
+        .card { cursor: pointer; transition: 0.3s; position: relative; }
+        .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 2px; }
+        .card h4 { font-size: 12px; font-weight: 400; margin: 10px 0 5px; text-transform: uppercase; }
+        .card .price { font-size: 13px; font-weight: bold; }
+        
+        .btn-add { width: 100%; background: var(--gris-claro); border: none; padding: 8px; font-size: 10px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .btn-add:hover { background: var(--negro); color: white; }
+
+        /* --- Modales --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; position: relative; }
+        .close { position: absolute; top: 15px; right: 20px; font-size: 25px; cursor: pointer; }
+
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .btn-main { background: var(--negro); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+        /* --- Estrellas --- */
+        .stars { color: #ccc; font-size: 20px; cursor: pointer; }
+        .stars .active { color: var(--oro); }
+
+        .knitting-anim { position: fixed; bottom: 10px; right: 10px; width: 100px; z-index: 100; }
+    </style>
+</head>
+<body>
+
+<div class="yarn-ball" style="left: 5%">🧶</div>
+<div class="yarn-ball" style="left: 90%; animation-duration: 15s;">🧶</div>
+
+<header>
+    <a href="#" class="logo">TEJIENDO LOCURAS</a>
+    <div class="nav-right">
+        <button class="nav-btn" onclick="openModal('modal-login')">Iniciar Sesión</button>
+        <button class="nav-btn" onclick="openModal('modal-cart')">Carrito (<span id="cart-count">0</span>)</button>
+    </div>
+</header>
+
+<div class="main-content">
+    <aside class="sidebar">
+        <h3>Categorías</h3>
+        <ul class="filter-list">
+            <li onclick="render(productos)">Todos los productos</li>
+            <li onclick="filtrar('amigurumi animales')">Amigurumi Animales</li>
+            <li onclick="filtrar('ropa a crochet')">Ropa a Crochet</li>
+            <li onclick="filtrar('accesorio y llavero')">Accesorio y Llavero</li>
+            <li onclick="filtrar('personaje de anime')">Personaje de Anime</li>
+        </ul>
+    </aside>
+
+    <main class="product-grid" id="grid"></main>
+</div>
+
+<!-- MODAL: LOGIN -->
+<div class="modal" id="modal-login">
+    <div class="modal-content" style="max-width: 400px;">
+        <span class="close" onclick="closeModal('modal-login')">&times;</span>
+        <h2>Ingresar</h2>
+        <input type="email" placeholder="Correo electrónico">
+        <input type="password" placeholder="Contraseña">
+        <button class="btn-main">ENTRAR</button>
+    </div>
+</div>
+
+<!-- MODAL: CARRITO -->
+<div class="modal" id="modal-cart">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="close" onclick="closeModal('modal-cart')">&times;</span>
+        <h2>Tu Carrito</h2>
+        <div id="cart-items"></div>
+        <hr>
+        <p><strong>Total: $<span id="cart-total">0.00</span></strong></p>
+        <button class="btn-main" onclick="openCheckout()">FINALIZAR COMPRA</button>
+    </div>
+</div>
+
+<!-- MODAL: DETALLE PRODUCTO -->
+<div class="modal" id="modal-detail">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('modal-detail')">&times;</span>
+        <div class="detail-grid">
+            <div id="detail-img"></div>
+            <div>
+                <h2 id="detail-title"></h2>
+                <p id="detail-price" style="font-size: 20px; font-weight: bold;"></p>
+                <div class="stars" id="star-rating">
+                    <span onclick="setRating(1)">★</span><span onclick="setRating(2)">★</span><span onclick="setRating(3)">★</span><span onclick="setRating(4)">★</span><span onclick="setRating(5)">★</span>
+                </div>
+                <textarea id="review-text" placeholder="Deja tu reseña..."></textarea>
+                <button class="btn-main" onclick="addReview()">PUBLICAR RESEÑA</button>
+                <div id="reviews-list" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: CHECKOUT (DATOS) -->
+<div class="modal" id="modal-checkout">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="close" onclick="closeModal('modal-checkout')">&times;</span>
+        <h2>Datos de Envío</h2>
+        <input type="text" id="cust-name" placeholder="Nombre completo">
+        <input type="text" id="cust-address" placeholder="Dirección exacta">
+        <input type="tel" id="cust-phone" placeholder="Teléfono">
+        <input type="email" id="cust-email" placeholder="Correo para confirmación">
+        <button class="btn-main" onclick="completeOrder()">CONFIRMAR PEDIDO</button>
+    </div>
+</div>
+
+<img src="https://img.freepik.com/vector-premium/lindo-personaje-anime-chibi-tejiendo-bufanda-lana_1030444-42.jpg" class="knitting-anim">
+
+<script>
+    const productos = [
+        { id: 1, nombre: "Gatito Alien", precio: 4, cat: "amigurumi animales", img: "https://i.pinimg.com/736x/1d/ea/04/1dea043bf91c7c9043c72e15811dd033.jpg", reviews: [] },
+        { id: 2, nombre: "Gato", precio: 4, cat: "amigurumi animales", img: "https://i.pinimg.com/736x/a4/86/0a/a4860a61536d8bd34280e246f2180167.jpg", reviews: [] },
+        { id: 3, nombre: "Paloma", precio: 6, cat: "amigurumi animales", img: "https://i.pinimg.com/1200x/12/17/c7/1217c7ee7a866c2a2ed2255206212cd3.jpg", reviews: [] },
+        { id: 4, nombre: "Vestido Corto Azul", precio: 40, cat: "ropa a crochet", img: "https://i.pinimg.com/736x/7b/3f/cf/7b3fcfd955a4edd6a11979f6491f737c.jpg", reviews: [] },
+        { id: 5, nombre: "Pantalón Ancho", precio: 30, cat: "ropa a crochet", img: "https://i.pinimg.com/webp85/1200x/60/66/6e/60666e2a584c6f595b8e6b5af387c9e5.webp", reviews: [] },
+        { id: 6, nombre: "Falda", precio: 25, cat: "ropa a crochet", img: "https://i.pinimg.com/webp85/1200x/2d/26/fc/2d26fcaaa6ab2323304f7a8fca8da1e6.webp", reviews: [] },
+        { id: 7, nombre: "Tulipanes", precio: 1.50, cat: "accesorio y llavero", img: "https://i.pinimg.com/1200x/db/0b/e8/db0be87d6b2a2fd3a69e64c42f24d373.jpg", reviews: [] },
+        { id: 8, nombre: "Gatitos", precio: 8, cat: "accesorio y llavero", img: "https://i.pinimg.com/736x/b8/e7/65/b8e765fe1f6ac37e396f56c761b4cd1e.jpg", reviews: [] },
+        { id: 9, nombre: "Diadema Diablo", precio: 3, cat: "accesorio y llavero", img: "https://i.pinimg.com/736x/eb/0f/91/eb0f913695a865f146005332108eda9f.jpg", reviews: [] },
+        { id: 10, nombre: "Bakugo", precio: 20, cat: "personaje de anime", img: "https://i.pinimg.com/webp85/736x/bb/87/98/bb8798d739937f61c772d80585ad8df9.webp", reviews: [] },
+        { id: 11, nombre: "Pucca y Garu", precio: 14, cat: "personaje de anime", img: "https://i.pinimg.com/1200x/e1/c6/3e/e1c63e95fac1efbbfbcd3c158e42680f.jpg", reviews: [] }
+    ];
+
+    let carrito = [];
+    let currentProd = null;
+    let rating = 0;
+
+    function render(lista) {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = lista.map(p => `
+            <div class="card">
+                <img src="${p.img}" onclick="openDetail(${p.id})">
+                <h4>${p.nombre}</h4>
+                <p class="price">$${p.precio.toFixed(2)}</p>
+                <button class="btn-add" onclick="addToCart(${p.id})">AGREGAR AL CARRITO</button>
+            </div>
+        `).join('');
+    }
+
+    function filtrar(cat) {
+        render(productos.filter(p => p.cat === cat));
+    }
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function openDetail(id) {
+        currentProd = productos.find(p => p.id === id);
+        document.getElementById('detail-title').innerText = currentProd.nombre;
+        document.getElementById('detail-price').innerText = `$${currentProd.precio.toFixed(2)}`;
+        document.getElementById('detail-img').innerHTML = `<img src="${currentProd.img}" style="width:100%; border-radius:4px;">`;
+        renderReviews();
+        openModal('modal-detail');
+    }
+
+    function addToCart(id) {
+        carrito.push(productos.find(p => p.id === id));
+        updateCart();
+    }
+
+    function updateCart() {
+        document.getElementById('cart-count').innerText = carrito.length;
+        let total = 0;
+        document.getElementById('cart-items').innerHTML = carrito.map(p => {
+            total += p.precio;
+            return `<p style="display:flex; justify-content:space-between"><span>${p.nombre}</span> <span>$${p.precio.toFixed(2)}</span></p>`;
+        }).join('');
+        document.getElementById('cart-total').innerText = total.toFixed(2);
+    }
+
+    function setRating(n) {
+        rating = n;
+        const s = document.querySelectorAll('#star-rating span');
+        s.forEach((span, i) => span.classList.toggle('active', i < n));
+    }
+
+    function addReview() {
+        const txt = document.getElementById('review-text').value;
+        if(!txt || rating === 0) return alert("Califica y escribe algo");
+        currentProd.reviews.push({ stars: rating, text: txt });
+        document.getElementById('review-text').value = '';
+        setRating(0);
+        renderReviews();
+    }
+
+    function renderReviews() {
+        document.getElementById('reviews-list').innerHTML = currentProd.reviews.map(r => `
+            <div style="margin-bottom:10px;"><span style="color:var(--oro)">${'★'.repeat(r.stars)}</span><br>${r.text}</div>
+        `).join('') || "Aún no hay reseñas.";
+    }
+
+    function openCheckout() {
+        if(carrito.length === 0) return alert("Carrito vacío");
+        closeModal('modal-cart');
+        openModal('modal-checkout');
+    }
+
+    function completeOrder() {
+        const n = document.getElementById('cust-name').value;
+        if(!n) return alert("Dinos tu nombre");
+        alert(`¡Gracias ${n}! Recibimos tu pedido en Tejiendo Locuras.`);
+        carrito = []; updateCart(); closeModal('modal-checkout');
+    }
+
+    render(productos);
+</script>
+</body>
+</html>
