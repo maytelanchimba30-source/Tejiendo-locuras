@@ -3,314 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tejiendo Locuras | Boutique Artesanal</title>
+    <title>Tejiendo Locuras | Tienda Oficial</title>
     <style>
-        :root {
-            --negro: #121212;
-            --gris-fondo: #f8f8f8;
-            --gris-suave: #e0e0e0;
-            --oro: #d4af37;
-            --acento: #b39ddb; /* Lila elegante */
+        :root { --negro: #111; --blanco: #fff; --gris: #f4f4f4; --oro: #c5a059; --lila: #9575cd; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: var(--blanco); color: var(--negro); }
+
+        /* --- NAVEGACIÓN --- */
+        header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 20px 8%; border-bottom: 1px solid #eee; position: sticky; top: 0; background: white; z-index: 1000;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; background: #fff; color: var(--negro); line-height: 1.6; }
-
-        /* --- Navegación --- */
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 8%; border-bottom: 1px solid var(--gris-suave);
-            position: sticky; top: 0; background: rgba(255,255,255,0.95); z-index: 1000;
-        }
-        .logo { font-size: 24px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; cursor: pointer; }
-        .nav-right { display: flex; gap: 30px; align-items: center; }
-        .nav-link { font-size: 12px; font-weight: 600; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
-        .nav-link:hover { color: var(--acento); }
-
-        /* --- Layout --- */
-        .hero { text-align: center; padding: 60px 20px; background: var(--gris-fondo); margin-bottom: 40px; }
-        .main-container { display: grid; grid-template-columns: 200px 1fr; gap: 50px; padding: 0 8% 100px; }
+        .logo { font-size: 22px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; }
         
-        .sidebar h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; color: #888; }
-        .filter-list { list-style: none; }
-        .filter-list li { padding: 10px 0; font-size: 14px; cursor: pointer; transition: 0.2s; border-bottom: 1px solid transparent; }
-        .filter-list li:hover { border-bottom: 1px solid var(--negro); padding-left: 5px; }
+        .nav-links { display: flex; gap: 30px; align-items: center; }
+        
+        /* Dropdown de Categorías */
+        .dropdown { position: relative; display: inline-block; }
+        .dropbtn { font-size: 13px; font-weight: 700; text-transform: uppercase; cursor: pointer; border: none; background: none; }
+        .dropdown-content { 
+            display: none; position: absolute; background: white; min-width: 200px; 
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1); z-index: 1; border: 1px solid #eee;
+        }
+        .dropdown-content a { color: black; padding: 12px 16px; text-decoration: none; display: block; font-size: 13px; }
+        .dropdown-content a:hover { background-color: var(--gris); }
+        .dropdown:hover .dropdown-content { display: block; }
 
-        /* --- Productos --- */
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 40px; }
-        .card { transition: 0.4s; position: relative; }
-        .card:hover { transform: translateY(-5px); }
-        .img-wrap { width: 100%; aspect-ratio: 3/4; overflow: hidden; background: var(--gris-fondo); position: relative; }
-        .img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
-        .card:hover img { transform: scale(1.05); }
-        .card-info { padding: 15px 0; text-align: center; }
-        .card h4 { font-size: 14px; font-weight: 500; text-transform: uppercase; margin-bottom: 8px; }
-        .card .price { font-weight: 700; font-size: 15px; color: #444; }
+        .cart-icon { cursor: pointer; font-weight: 700; font-size: 13px; text-transform: uppercase; }
 
-        /* --- Botones --- */
-        .btn-black { background: var(--negro); color: white; border: none; padding: 12px 25px; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; cursor: pointer; width: 100%; transition: 0.3s; }
-        .btn-black:hover { background: #333; }
+        /* --- GRID DE PRODUCTOS --- */
+        .container { padding: 40px 8%; text-align: center; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 40px; margin-top: 30px; }
+        
+        .card { transition: 0.3s; cursor: pointer; border: 1px solid transparent; padding: 10px; }
+        .card:hover { border: 1px solid #eee; }
+        .card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: var(--gris); }
+        .card h4 { font-size: 14px; text-transform: uppercase; margin: 15px 0 5px; font-weight: 400; }
+        .card .price { font-weight: 700; margin-bottom: 15px; }
+        
+        .btn-add { 
+            width: 100%; background: var(--negro); color: white; border: none; 
+            padding: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; cursor: pointer;
+        }
 
-        /* --- Modales Elegantes --- */
-        .modal { position: fixed; inset: 0; background: rgba(255,255,255,0.98); display: none; z-index: 3000; overflow-y: auto; padding: 50px 0; }
-        .modal-inner { max-width: 1100px; margin: auto; padding: 20px; position: relative; }
-        .close-btn { position: absolute; top: 0; right: 20px; font-size: 40px; cursor: pointer; }
+        /* --- MODALES --- */
+        .modal { position: fixed; inset: 0; background: white; display: none; z-index: 2000; overflow-y: auto; padding: 60px 0; }
+        .modal-content { max-width: 900px; margin: auto; padding: 20px; position: relative; }
+        .close-modal { position: absolute; top: 0; right: 20px; font-size: 35px; cursor: pointer; }
 
-        /* --- Admin Table --- */
-        .admin-controls { background: var(--gris-fondo); padding: 30px; border-radius: 4px; margin-bottom: 30px; }
-        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .admin-table th, .admin-table td { text-align: left; padding: 15px; border-bottom: 1px solid #ddd; }
-        input { padding: 12px; border: 1px solid #ddd; margin: 5px 0; width: 100%; }
+        /* --- ADMIN PANEL --- */
+        .admin-view { background: var(--gris); padding: 40px; border-radius: 8px; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; }
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 30px; background: white; }
+        .admin-table th, .admin-table td { border: 1px solid #eee; padding: 15px; text-align: left; font-size: 14px; }
 
-        /* --- Estrellas --- */
-        .stars { color: #ddd; font-size: 22px; margin: 10px 0; cursor: pointer; }
+        /* --- CHAT --- */
+        #chat-btn { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--negro); color: white; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 3000; }
+        #chat-box { position: fixed; bottom: 100px; right: 30px; width: 320px; background: white; border: 1px solid #eee; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-radius: 10px; display: none; flex-direction: column; z-index: 3000; }
+        .chat-header { background: var(--negro); color: white; padding: 15px; border-radius: 10px 10px 0 0; font-size: 14px; font-weight: bold; }
+        .chat-messages { height: 250px; overflow-y: auto; padding: 15px; font-size: 13px; }
+
+        .stars { color: #ddd; font-size: 20px; cursor: pointer; margin: 10px 0; }
         .stars .active { color: var(--oro); }
-
-        /* --- Chat --- */
-        #chat-ui { position: fixed; bottom: 30px; right: 30px; width: 320px; background: white; border: 1px solid #eee; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 12px; display: none; flex-direction: column; z-index: 4000; }
-        .chat-header { background: var(--negro); color: white; padding: 15px; border-radius: 12px 12px 0 0; }
-        .chat-msgs { height: 250px; overflow-y: auto; padding: 15px; font-size: 13px; }
-        .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 15px; max-width: 80%; }
-        .msg.client { background: var(--gris-fondo); align-self: flex-start; }
-        .msg.admin { background: var(--acento); color: white; align-self: flex-end; }
     </style>
 </head>
 <body>
 
 <header>
-    <a href="#" class="logo" onclick="location.reload()">Tejiendo Locuras</a>
-    <div class="nav-right">
-        <span class="nav-link" onclick="openModal('modal-login')">Entrar</span>
-        <span class="nav-link" onclick="openModal('modal-cart')">Carrito (<span id="cart-count">0</span>)</span>
+    <div class="logo">Tejiendo Locuras</div>
+    <div class="nav-links">
+        <div class="dropdown">
+            <span class="dropbtn">Colecciones ▼</span>
+            <div class="dropdown-content">
+                <a href="#" onclick="render(productos)">Todos los productos</a>
+                <a href="#" onclick="filter('amigurumi animales')">Animales</a>
+                <a href="#" onclick="filter('ropa a crochet')">Ropa</a>
+                <a href="#" onclick="filter('personaje de anime')">Anime</a>
+                <a href="#" onclick="filter('accesorio y llavero')">Accesorios</a>
+            </div>
+        </div>
+        <span class="cart-icon" onclick="openModal('cart-modal')">Carrito (<span id="cart-count">0</span>)</span>
     </div>
 </header>
 
-<section class="hero">
-    <h1>Arte en cada puntada</h1>
-    <p>Diseños exclusivos hechos a mano.</p>
-</section>
-
-<div class="main-container">
-    <aside class="sidebar">
-        <h3>Colecciones</h3>
-        <ul class="filter-list">
-            <li onclick="renderStore(productos)">Todos los productos</li>
-            <li onclick="filterBy('amigurumi animales')">Amigurumi Animales</li>
-            <li onclick="filterBy('ropa a crochet')">Ropa de Diseño</li>
-            <li onclick="filterBy('personaje de anime')">Mundo Anime</li>
-            <li onclick="filterBy('accesorio y llavero')">Accesorios</li>
-        </ul>
-    </aside>
-
-    <main class="product-grid" id="main-grid"></main>
+<div class="container">
+    <h2 id="view-title">Todos los productos</h2>
+    <div class="product-grid" id="main-grid"></div>
 </div>
 
-<!-- MODAL: LOGIN -->
-<div class="modal" id="modal-login">
-    <div class="modal-inner" style="max-width: 400px; text-align: center;">
-        <span class="close-btn" onclick="closeModal('modal-login')">&times;</span>
-        <h2 style="margin-bottom: 30px;">Iniciar Sesión</h2>
-        <input type="email" placeholder="Email">
-        <input type="password" placeholder="Contraseña">
-        <button class="btn-black" style="margin-top: 20px;">Acceder</button>
+<!-- MODAL: DETALLE Y RESEÑAS -->
+<div class="modal" id="detail-modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal('detail-modal')">&times;</span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+            <div id="detail-img-box"></div>
+            <div>
+                <h2 id="detail-name"></h2>
+                <p id="detail-price" style="font-size: 22px; font-weight: bold; margin: 15px 0;"></p>
+                <hr>
+                <div class="stars" id="star-input">
+                    <span onclick="setRate(1)">★</span><span onclick="setRate(2)">★</span><span onclick="setRate(3)">★</span><span onclick="setRate(4)">★</span><span onclick="setRate(5)">★</span>
+                </div>
+                <textarea id="review-text" placeholder="Escribe tu opinión..." style="width:100%; height:80px; padding:10px;"></textarea>
+                <button class="btn-add" onclick="saveReview()" style="margin-top:10px;">Publicar Reseña</button>
+                <div id="review-list" style="margin-top:30px; border-top:1px solid #eee; padding-top:20px;"></div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- MODAL: ADMIN (OCULTO) -->
-<div class="modal" id="modal-admin">
-    <div class="modal-inner">
-        <span class="close-btn" onclick="closeModal('modal-admin')">&times;</span>
-        <div id="admin-auth-view">
-            <h2>Acceso Restringido</h2>
-            <input type="password" id="admin-pass-input" placeholder="Clave Maestra">
-            <button class="btn-black" onclick="verifyAdmin()">Entrar al Panel</button>
+<!-- MODAL: CARRITO -->
+<div class="modal" id="cart-modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="close-modal" onclick="closeModal('cart-modal')">&times;</span>
+        <h2>Tu Carrito</h2>
+        <div id="cart-items" style="margin: 30px 0;"></div>
+        <div style="border-top: 2px solid black; padding-top: 20px;">
+            <h3>Total: $<span id="cart-total">0.00</span></h3>
+            <button class="btn-add" style="margin-top: 20px;" onclick="openModal('checkout-modal')">Finalizar Compra</button>
         </div>
-        <div id="admin-panel-view" style="display: none;">
-            <h2>Panel de Gestión</h2>
-            <div class="admin-controls">
-                <h3>Añadir Nuevo Diseño</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <input type="text" id="new-name" placeholder="Nombre del Producto">
-                    <input type="number" id="new-price" placeholder="Precio ($)">
-                    <input type="text" id="new-cat" placeholder="Categoría">
-                    <input type="text" id="new-img" placeholder="Link de Imagen">
-                </div>
-                <button class="btn-black" style="margin-top: 15px;" onclick="addNewProduct()">Guardar en Tienda</button>
+    </div>
+</div>
+
+<!-- MODAL: ADMIN (SECRETO) -->
+<div class="modal" id="admin-modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal('admin-modal')">&times;</span>
+        <div id="admin-login">
+            <h2>Acceso Administrativo</h2>
+            <input type="password" id="admin-pass" placeholder="Contraseña Maestra">
+            <button class="btn-add" onclick="accessAdmin()">Entrar</button>
+        </div>
+        <div id="admin-panel" style="display:none;">
+            <h2>Gestión de Tejiendo Locuras</h2>
+            <div class="admin-view">
+                <h3>Agregar Nuevo Producto</h3>
+                <input type="text" id="add-n" placeholder="Nombre">
+                <input type="number" id="add-p" placeholder="Precio">
+                <select id="add-c">
+                    <option value="amigurumi animales">Animales</option>
+                    <option value="ropa a crochet">Ropa</option>
+                    <option value="personaje de anime">Anime</option>
+                    <option value="accesorio y llavero">Accesorios</option>
+                </select>
+                <input type="text" id="add-i" placeholder="URL de Imagen">
+                <button class="btn-add" onclick="createProduct()">Añadir a la Tienda</button>
             </div>
             <table class="admin-table">
-                <thead><tr><th>Producto</th><th>Precio ($)</th><th>Acción</th></tr></thead>
-                <tbody id="admin-rows"></tbody>
+                <thead><tr><th>Producto</th><th>Precio</th><th>Acción</th></tr></thead>
+                <tbody id="admin-table-body"></tbody>
             </table>
-            <button class="btn-black" style="margin-top: 30px; background: #555;" onclick="generateGithubCode()">Exportar Código para GitHub</button>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL: CARRITO / CHECKOUT -->
-<div class="modal" id="modal-cart">
-    <div class="modal-inner" style="max-width: 600px;">
-        <span class="close-btn" onclick="closeModal('modal-cart')">&times;</span>
-        <h2>Tu Selección</h2>
-        <div id="cart-list" style="margin: 30px 0;"></div>
-        <div style="border-top: 2px solid #000; padding-top: 20px;">
-            <h3>Total: $<span id="cart-total-val">0.00</span></h3>
-            <div id="checkout-form" style="margin-top: 30px;">
-                <h4>Datos de Envío</h4>
-                <input type="text" id="c-name" placeholder="Nombre Completo">
-                <input type="text" id="c-addr" placeholder="Dirección de Entrega">
-                <input type="tel" id="c-phone" placeholder="WhatsApp / Teléfono">
-                <button class="btn-black" style="margin-top: 20px;" onclick="confirmPurchase()">Finalizar y Pagar</button>
-            </div>
         </div>
     </div>
 </div>
 
 <!-- CHAT -->
-<div id="chat-ui">
-    <div class="chat-header">Chat Tejiendo Locuras</div>
-    <div class="chat-msgs" id="chat-box"></div>
-    <div style="display: flex; padding: 10px; border-top: 1px solid #eee;">
-        <input type="text" id="chat-input" placeholder="Escribe..." style="margin: 0; flex: 1;">
-        <button onclick="sendMsg()" style="padding: 10px; border: none; background: none; cursor: pointer;">➤</button>
+<button id="chat-btn" onclick="toggleChat()">💬</button>
+<div id="chat-box">
+    <div class="chat-header">Asistente Tejiendo Locuras</div>
+    <div class="chat-messages" id="chat-msgs"></div>
+    <div style="display:flex; padding:10px;">
+        <input type="text" id="chat-in" placeholder="Escribe..." style="margin:0; flex:1;">
+        <button onclick="send()" style="padding:10px; background:none; border:none; cursor:pointer;">➤</button>
     </div>
 </div>
-<button onclick="toggleChat()" style="position: fixed; bottom: 30px; right: 30px; border-radius: 50%; width: 60px; height: 60px; border: none; background: var(--negro); color: white; font-size: 24px; cursor: pointer; z-index: 3999;">💬</button>
 
 <script>
-    // Base de datos sincronizada con localStorage
+    // Base de datos persistente
     let productos = JSON.parse(localStorage.getItem('tl_data')) || [
         { id: 1, nombre: "Gatito Alien", precio: 4, cat: "amigurumi animales", img: "https://i.pinimg.com/736x/1d/ea/04/1dea043bf91c7c9043c72e15811dd033.jpg", reviews: [] },
         { id: 2, nombre: "Bakugo Chibi", precio: 20, cat: "personaje de anime", img: "https://i.pinimg.com/webp85/736x/bb/87/98/bb8798d739937f61c772d80585ad8df9.webp", reviews: [] },
-        { id: 3, nombre: "Paloma Urbana", precio: 6, cat: "amigurumi animales", img: "https://i.pinimg.com/1200x/12/17/c7/1217c7ee7a866c2a2ed2255206212cd3.jpg", reviews: [] },
-        { id: 4, nombre: "Vestido Azul Crochet", precio: 40, cat: "ropa a crochet", img: "https://i.pinimg.com/736x/7b/3f/cf/7b3fcfd955a4edd6a11979f6491f737c.jpg", reviews: [] }
+        { id: 3, nombre: "Tulipanes", precio: 1.5, cat: "accesorio y llavero", img: "https://i.pinimg.com/1200x/db/0b/e8/db0be87d6b2a2fd3a69e64c42f24d373.jpg", reviews: [] }
     ];
 
-    let cart = [];
-    let is_admin = false;
+    let carrito = [];
+    let currentId = null;
+    let stars = 0;
 
-    // --- ACCESO SECRETO (Ctrl + Shift + A) ---
+    // --- COMANDO ADMIN SECRETO ---
     document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-            openModal('modal-admin');
-        }
+        if (e.ctrlKey && e.shiftKey && e.key === 'A') openModal('admin-modal');
     });
 
-    function verifyAdmin() {
-        const p = document.getElementById('admin-pass-input').value;
-        if(p === "Locuras2026") {
-            is_admin = true;
-            document.getElementById('admin-auth-view').style.display = 'none';
-            document.getElementById('admin-panel-view').style.display = 'block';
-            renderAdminTable();
-        } else { alert("Acceso Denegado"); }
-    }
-
-    function renderStore(list) {
+    function render(lista) {
         const grid = document.getElementById('main-grid');
-        grid.innerHTML = list.map(p => `
+        grid.innerHTML = lista.map(p => `
             <div class="card">
-                <div class="img-wrap"><img src="${p.img}"></div>
-                <div class="card-info">
-                    <h4>${p.nombre}</h4>
-                    <p class="price">$${p.precio.toFixed(2)}</p>
-                    <button class="btn-black" onclick="addToCart(${p.id})" style="margin-top:10px;">Añadir</button>
-                </div>
+                <img src="${p.img}" onclick="openDetail(${p.id})">
+                <h4>${p.nombre}</h4>
+                <p class="price">$${p.precio.toFixed(2)}</p>
+                <button class="btn-add" onclick="addToCart(${p.id})">Agregar al Carrito</button>
             </div>
         `).join('');
+        renderAdmin();
     }
 
-    function filterBy(cat) { renderStore(productos.filter(p => p.cat === cat)); }
+    function filter(cat) {
+        document.getElementById('view-title').innerText = cat.toUpperCase();
+        render(productos.filter(p => p.cat === cat));
+    }
 
     function addToCart(id) {
-        const p = productos.find(x => x.id === id);
-        cart.push(p);
-        updateCartUI();
+        carrito.push(productos.find(p => p.id === id));
+        document.getElementById('cart-count').innerText = carrito.length;
+        updateCart();
     }
 
-    function updateCartUI() {
-        document.getElementById('cart-count').innerText = cart.length;
+    function updateCart() {
         let total = 0;
-        document.getElementById('cart-list').innerHTML = cart.map(p => {
+        document.getElementById('cart-items').innerHTML = carrito.map(p => {
             total += p.precio;
-            return `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <span>${p.nombre}</span> <strong>$${p.precio.toFixed(2)}</strong>
-            </div>`;
-        }).join('') || "Tu carrito está vacío.";
-        document.getElementById('cart-total-val').innerText = total.toFixed(2);
-    }
-
-    function confirmPurchase() {
-        const name = document.getElementById('c-name').value;
-        if(!name) return alert("Por favor completa tus datos");
-        alert(`¡Gracias ${name}! Tu pedido ha sido enviado a Tejiendo Locuras.`);
-        cart = []; updateCartUI(); closeModal('modal-cart');
+            return `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${p.nombre}</span> <strong>$${p.precio.toFixed(2)}</strong></div>`;
+        }).join('') || "Vacio";
+        document.getElementById('cart-total').innerText = total.toFixed(2);
     }
 
     // --- FUNCIONES ADMIN ---
-    function renderAdminTable() {
-        const tbody = document.getElementById('admin-rows');
-        tbody.innerHTML = productos.map(p => `
+    function accessAdmin() {
+        if(document.getElementById('admin-pass').value === "Locuras2026") {
+            document.getElementById('admin-login').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+        } else { alert("Error"); }
+    }
+
+    function renderAdmin() {
+        document.getElementById('admin-table-body').innerHTML = productos.map(p => `
             <tr>
                 <td>${p.nombre}</td>
-                <td><input type="number" value="${p.precio}" onchange="updatePrice(${p.id}, this.value)"></td>
-                <td><button onclick="removeProd(${p.id})" style="color:red; background:none; border:none; cursor:pointer;">Borrar</button></td>
+                <td><input type="number" value="${p.precio}" onchange="editPrice(${p.id}, this.value)" style="width:80px;"></td>
+                <td><button onclick="del(${p.id})" style="color:red; background:none; border:none; cursor:pointer;">Eliminar</button></td>
             </tr>
         `).join('');
     }
 
-    function updatePrice(id, val) {
-        productos.find(x => x.id === id).precio = parseFloat(val);
-        saveData();
+    function createProduct() {
+        const n = document.getElementById('add-n').value;
+        const p = document.getElementById('add-p').value;
+        const c = document.getElementById('add-c').value;
+        const i = document.getElementById('add-i').value;
+        if(n && p && i) {
+            productos.push({ id: Date.now(), nombre: n, precio: parseFloat(p), cat: c, img: i, reviews: [] });
+            save(); render(productos);
+        }
     }
 
-    function removeProd(id) {
-        productos = productos.filter(x => x.id !== id);
-        saveData();
-        renderAdminTable();
-        renderStore(productos);
-    }
-
-    function addNewProduct() {
-        const n = document.getElementById('new-name').value;
-        const pr = document.getElementById('new-price').value;
-        const ct = document.getElementById('new-cat').value;
-        const im = document.getElementById('new-img').value;
-        if(!n || !pr) return alert("Datos incompletos");
-        productos.push({ id: Date.now(), nombre: n, precio: parseFloat(pr), cat: ct, img: im, reviews: [] });
-        saveData();
-        renderAdminTable();
-        renderStore(productos);
-        alert("Producto añadido.");
-    }
-
-    function saveData() { localStorage.setItem('tl_data', JSON.stringify(productos)); }
-
-    function generateGithubCode() {
-        const code = `let productos = ${JSON.stringify(productos, null, 4)};`;
-        console.log(code);
-        alert("El código ha sido impreso en la Consola (F12). Cópialo para tu archivo final.");
-    }
+    function editPrice(id, val) { productos.find(x => x.id === id).precio = parseFloat(val); save(); }
+    function del(id) { productos = productos.filter(x => x.id !== id); save(); render(productos); }
+    function save() { localStorage.setItem('tl_data', JSON.stringify(productos)); }
 
     // --- MODALES Y CHAT ---
     function openModal(id) { document.getElementById(id).style.display = 'block'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function toggleChat() { 
-        const c = document.getElementById('chat-ui');
-        c.style.display = c.style.display === 'flex' ? 'none' : 'flex';
+    
+    function openDetail(id) {
+        currentId = id;
+        const p = productos.find(x => x.id === id);
+        document.getElementById('detail-name').innerText = p.nombre;
+        document.getElementById('detail-price').innerText = `$${p.precio.toFixed(2)}`;
+        document.getElementById('detail-img-box').innerHTML = `<img src="${p.img}" style="width:100%;">`;
+        drawReviews();
+        openModal('detail-modal');
     }
 
-    function sendMsg() {
-        const i = document.getElementById('chat-input');
-        const b = document.getElementById('chat-box');
+    function setRate(n) {
+        stars = n;
+        const s = document.querySelectorAll('#star-input span');
+        s.forEach((span, i) => span.classList.toggle('active', i < n));
+    }
+
+    function saveReview() {
+        const txt = document.getElementById('review-text').value;
+        if(stars === 0 || !txt) return alert("Completa la reseña");
+        productos.find(x => x.id === currentId).reviews.push({ s: stars, t: txt });
+        save(); drawReviews();
+    }
+
+    function drawReviews() {
+        const p = productos.find(x => x.id === currentId);
+        document.getElementById('review-list').innerHTML = p.reviews.map(r => `
+            <div style="margin-bottom:15px;"><span style="color:var(--oro)">${'★'.repeat(r.s)}</span><br>${r.t}</div>
+        `).join('') || "Sin reseñas";
+    }
+
+    function toggleChat() { 
+        const c = document.getElementById('chat-box');
+        c.style.display = (c.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    function send() {
+        const i = document.getElementById('chat-in');
         if(!i.value) return;
-        b.innerHTML += `<div class="msg client">${i.value}</div>`;
-        const resp = is_admin ? "Respuesta de Admin activa." : "¡Hola! En Tejiendo Locuras te responderemos pronto.";
-        setTimeout(() => { b.innerHTML += `<div class="msg admin">${resp}</div>`; b.scrollTop = b.scrollHeight; }, 600);
+        document.getElementById('chat-msgs').innerHTML += `<div style="text-align:right; margin-bottom:10px;"><b>Tú:</b> ${i.value}</div>`;
+        setTimeout(() => {
+            document.getElementById('chat-msgs').innerHTML += `<div style="margin-bottom:10px; color:var(--lila)"><b>Admin:</b> ¡Hola! En breve te atenderemos.</div>`;
+        }, 500);
         i.value = "";
     }
 
-    renderStore(productos);
+    render(productos);
 </script>
-
 </body>
 </html>
