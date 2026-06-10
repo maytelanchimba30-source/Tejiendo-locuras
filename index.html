@@ -51,8 +51,24 @@
         .stars .active { color: var(--oro); }
 
         /* --- Admin Panel --- */
-        .admin-area { background: var(--gris); padding: 30px; border-radius: 4px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; }
+        .admin-area { background: var(--gris); padding: 30px; border-radius: 4px; margin-bottom: 30px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; background: #fff; }
+
+        /* --- Componentes de Gráfica CSS --- */
+        .stats-container { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; margin-top: 30px; }
+        .stat-card { background: white; padding: 20px; border: 1px solid #eee; text-align: center; border-radius: 4px; }
+        .chart-box { background: white; padding: 20px; border: 1px solid #eee; border-radius: 4px; }
+        .bar-chart { display: flex; align-items: flex-end; gap: 15px; height: 200px; padding-top: 20px; border-bottom: 2px solid #000; }
+        .bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
+        .bar { width: 100%; background: var(--oro); min-height: 5px; transition: height 0.5s ease; position: relative; }
+        .bar-value { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: bold; }
+        .bar-label { font-size: 10px; text-transform: uppercase; margin-top: 8px; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* --- Factura --- */
+        .invoice { border: 2px dashed #000; padding: 30px; max-width: 500px; margin: 0 auto; font-family: monospace; }
+        .invoice-title { text-align: center; font-weight: bold; font-size: 18px; margin-bottom: 20px; letter-spacing: 2px; }
+        .invoice-line { border-top: 1px dashed #000; margin: 15px 0; }
+        .invoice-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -78,7 +94,6 @@
     <div class="product-grid" id="main-grid"></div>
 </div>
 
-<!-- MODAL: INICIO DE SESIÓN -->
 <div class="modal" id="login-modal">
     <div class="modal-inner" style="max-width: 400px; text-align: center;">
         <span class="close-x" onclick="toggleModal('login-modal')">&times;</span>
@@ -89,20 +104,32 @@
     </div>
 </div>
 
-<!-- MODAL: CARRITO -->
 <div class="modal" id="cart-modal">
     <div class="modal-inner" style="max-width: 600px;">
         <span class="close-x" onclick="toggleModal('cart-modal')">&times;</span>
         <h2 style="letter-spacing: 2px; border-bottom: 1px solid #eee; padding-bottom: 20px;">TU BOLSA</h2>
-        <div id="cart-list" style="margin: 30px 0;"></div>
-        <div style="text-align: right;">
-            <h3 style="font-size: 24px;">Total: $<span id="total-price">0.00</span></h3>
-            <button class="btn-buy" style="margin-top: 30px; width: 200px;" onclick="checkout()">Pagar</button>
+        
+        <div id="cart-checkout-container">
+            <div id="cart-list" style="margin: 30px 0;"></div>
+            
+            <div id="checkout-form" style="display:none; border-top: 1px dashed #ddd; padding-top: 20px; margin-bottom: 20px;">
+                <h4 style="letter-spacing: 1px; margin-bottom: 10px;">DATOS DE FACTURACIÓN</h4>
+                <input type="text" id="buy-name" placeholder="Nombre Completo *" required>
+                <input type="text" id="buy-dni" placeholder="Cédula o Identificación *" required>
+                <input type="email" id="buy-email" placeholder="Correo Electrónico *" required>
+                <input type="tel" id="buy-phone" placeholder="Teléfono/Celular *" required>
+            </div>
+
+            <div style="text-align: right;">
+                <h3 style="font-size: 24px;">Total: $<span id="total-price">0.00</span></h3>
+                <button id="btn-action-cart" class="btn-buy" style="margin-top: 30px; width: 200px;" onclick="enableCheckoutForm()">Proceder al Pago</button>
+            </div>
         </div>
+
+        <div id="invoice-container" style="display:none; margin-top:20px;"></div>
     </div>
 </div>
 
-<!-- MODAL: DETALLE + RESEÑAS -->
 <div class="modal" id="item-modal">
     <div class="modal-inner">
         <span class="close-x" onclick="toggleModal('item-modal')">&times;</span>
@@ -122,7 +149,6 @@
     </div>
 </div>
 
-<!-- MODAL: ADMIN SECRETO (Alt + A) -->
 <div class="modal" id="admin-modal">
     <div class="modal-inner">
         <span class="close-x" onclick="toggleModal('admin-modal')">&times;</span>
@@ -132,6 +158,28 @@
             <button class="btn-buy" onclick="verifyAdmin()">Entrar al Sistema</button>
         </div>
         <div id="admin-main" style="display:none;">
+            
+            <div class="admin-area" style="background:#fff; border: 1px solid #ddd;">
+                <h3>Dashboard de Ventas e Ingresos</h3>
+                <div class="stats-container">
+                    <div style="display:flex; flex-direction:column; gap:15px;">
+                        <div class="stat-card">
+                            <p style="font-size:11px; text-transform:uppercase; color:#666;">Total Ganancias</p>
+                            <h2 style="font-size:28px; color:var(--oro);" id="stat-earnings">$0.00</h2>
+                        </div>
+                        <div class="stat-card">
+                            <p style="font-size:11px; text-transform:uppercase; color:#666;">Productos Vendidos</p>
+                            <h2 style="font-size:28px;" id="stat-count">0 Uds</h2>
+                        </div>
+                    </div>
+                    <div class="chart-box">
+                        <p style="font-size:11px; text-transform:uppercase; color:#666; margin-bottom:10px;">Ganancias por Categoría</p>
+                        <div class="bar-chart" id="category-chart">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="admin-area">
                 <h3>Nuevo Producto</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -146,6 +194,7 @@
                 </div>
                 <button class="btn-buy" style="margin-top:10px;" onclick="saveNewProd()">Publicar</button>
             </div>
+            
             <table style="width:100%; border-collapse: collapse; margin-top: 30px;">
                 <tbody id="admin-rows"></tbody>
             </table>
@@ -159,6 +208,9 @@
         { id: 2, name: "Bakugo", price: 20, cat: "personaje de anime", img: "https://i.pinimg.com/webp85/736x/bb/87/98/bb8798d739937f61c772d80585ad8df9.webp", reviews: [] },
         { id: 3, name: "Tulipanes", price: 1.5, cat: "accesorio y llavero", img: "https://i.pinimg.com/1200x/db/0b/e8/db0be87d6b2a2fd3a69e64c42f24d373.jpg", reviews: [] }
     ];
+
+    // Historial de ventas global persistente
+    let ventas = JSON.parse(localStorage.getItem('tl_sales')) || [];
 
     let cart = [];
     let curId = null;
@@ -222,6 +274,104 @@
             </div>`;
         }).join('') || "No hay artículos en tu bolsa.";
         document.getElementById('total-price').innerText = total.toFixed(2);
+        
+        // Resetear vistas del formulario de compra si se vacía o actualiza
+        document.getElementById('checkout-form').style.display = 'none';
+        document.getElementById('cart-checkout-container').style.display = 'block';
+        document.getElementById('invoice-container').style.display = 'none';
+        document.getElementById('btn-action-cart').innerText = "Proceder al Pago";
+        document.getElementById('btn-action-cart').setAttribute("onclick", "enableCheckoutForm()");
+    }
+
+    // Flujo de compra: Activa los campos requeridos
+    function enableCheckoutForm() {
+        if(cart.length === 0) return alert("Tu bolsa está vacía.");
+        document.getElementById('checkout-form').style.display = 'block';
+        
+        // Autofilar nombre si está logueado
+        if(localStorage.getItem('tl_user')) {
+            document.getElementById('buy-name').value = localStorage.getItem('tl_user');
+        }
+
+        const btn = document.getElementById('btn-action-cart');
+        btn.innerText = "Finalizar Compra y Facturar";
+        btn.setAttribute("onclick", "processCheckout()");
+    }
+
+    // Valida datos, almacena estadísticas y genera la Factura impresa en pantalla
+    function processCheckout() {
+        const name = document.getElementById('buy-name').value.trim();
+        const dni = document.getElementById('buy-dni').value.trim();
+        const email = document.getElementById('buy-email').value.trim();
+        const phone = document.getElementById('buy-phone').value.trim();
+
+        if(!name || !dni || !email || !phone) {
+            return alert("Por favor complete todos los campos requeridos para emitir su factura.");
+        }
+
+        let total = cart.reduce((acc, p) => acc + p.price, 0);
+        let nroFactura = Math.floor(100000 + Math.random() * 900000);
+        let fecha = new Date().toLocaleString();
+
+        // Guardar la venta detallada en el historial para las estadísticas
+        cart.forEach(item => {
+            ventas.push({
+                fecha: fecha,
+                cat: item.cat || 'otros',
+                price: item.price,
+                name: item.name
+            });
+        });
+        localStorage.setItem('tl_sales', JSON.stringify(ventas));
+
+        // Construcción limpia y estructurada de la Factura física
+        let itemsHtml = cart.map(p => `
+            <div class="invoice-row">
+                <span>1x ${p.name}</span>
+                <span>$${p.price.toFixed(2)}</span>
+            </div>
+        `).join('');
+
+        let invoiceHtml = `
+            <div class="invoice">
+                <div class="invoice-title">TEJIENDO LOCURAS</div>
+                <div style="text-align:center; font-size:11px; margin-bottom:15px;">BOUTIQUE PROFESIONAL</div>
+                <div class="invoice-row"><span>FACTURA NRO:</span><span>#${nroFactura}</span></div>
+                <div class="invoice-row"><span>FECHA:</span><span>${fecha}</span></div>
+                <div class="invoice-line"></div>
+                <div class="invoice-row"><span>CLIENTE:</span><span>${name}</span></div>
+                <div class="invoice-row"><span>ID/CÉDULA:</span><span>${dni}</span></div>
+                <div class="invoice-row"><span>TELÉFONO:</span><span>${phone}</span></div>
+                <div class="invoice-line"></div>
+                <div style="font-weight:bold; margin-bottom:10px; font-size:12px;">DETALLE DE PRODUCTOS:</div>
+                ${itemsHtml}
+                <div class="invoice-line"></div>
+                <div class="invoice-row" style="font-weight:bold; font-size:15px;">
+                    <span>TOTAL PAGADO:</span>
+                    <span>$${total.toFixed(2)}</span>
+                </div>
+                <div class="invoice-line"></div>
+                <p style="text-align:center; font-size:11px; margin-top:15px;">¡Gracias por valorar el arte hecho a mano!</p>
+                <button class="btn-buy" style="margin-top:20px; background:#000;" onclick="window.print()">Imprimir Factura</button>
+                <button class="btn-buy" style="margin-top:10px; background:#666;" onclick="closeCartAfterBuy()">Cerrar</button>
+            </div>
+        `;
+
+        // Ocultar caja de carrito y desplegar la factura limpia
+        document.getElementById('cart-checkout-container').style.display = 'none';
+        const invBox = document.getElementById('invoice-container');
+        invBox.innerHTML = invoiceHtml;
+        invBox.style.display = 'block';
+
+        // Resetear bolsa
+        cart = [];
+        document.getElementById('cart-count').innerText = 0;
+        updateStats();
+    }
+
+    function closeCartAfterBuy() {
+        toggleModal('cart-modal');
+        refreshCart();
     }
 
     function openItem(id) {
@@ -264,7 +414,40 @@
         if(document.getElementById('admin-key').value === "Locuras2026") {
             document.getElementById('admin-auth-box').style.display = 'none';
             document.getElementById('admin-main').style.display = 'block';
+            updateStats();
         }
+    }
+
+    // Calcula ingresos y construye gráficas dinámicas basadas en los datos reales acumulados
+    function updateStats() {
+        let totalDinero = ventas.reduce((acc, v) => acc + v.price, 0);
+        document.getElementById('stat-earnings').innerText = `$${totalDinero.toFixed(2)}`;
+        document.getElementById('stat-count').innerText = `${ventas.length} Uds`;
+
+        // Clasificar ganancias mapeando las categorías existentes
+        let cats = { 'amigurumi animales': 0, 'personaje de anime': 0, 'ropa a crochet': 0, 'accesorio y llavero': 0 };
+        ventas.forEach(v => {
+            if(cats[v.cat] !== undefined) cats[v.cat] += v.price;
+            else cats[v.cat] = v.price;
+        });
+
+        // Encontrar valor máximo para calcular proporcionalmente el alto de la barra (Max 100%)
+        let maxVal = Math.max(...Object.values(cats), 1);
+
+        let chartHtml = Object.keys(cats).map(c => {
+            let alturaPorcentaje = (cats[c] / maxVal) * 80; // tope de 80% para margen del texto indicador
+            let labelCorto = c.replace('amigurumi ', '').replace('personaje de ', '');
+            return `
+                <div class="bar-wrapper">
+                    <div class="bar" style="height: ${alturaPorcentaje}%;">
+                        <span class="bar-value">$${cats[c].toFixed(0)}</span>
+                    </div>
+                    <span class="bar-label" title="${c}">${labelCorto}</span>
+                </div>
+            `;
+        }).join('');
+
+        document.getElementById('category-chart').innerHTML = chartHtml;
     }
 
     function saveNewProd() {
@@ -275,12 +458,17 @@
         if(n && p) {
             productos.push({ id: Date.now(), name: n, price: p, cat: c, img: i, reviews: [] });
             save(); render(productos);
+            // Limpiar inputs creados
+            document.getElementById('a-name').value = "";
+            document.getElementById('a-price').value = "";
+            document.getElementById('a-img').value = "";
         }
     }
 
     function save() { localStorage.setItem('tl_db', JSON.stringify(productos)); }
     function toggleModal(id) { const m = document.getElementById(id); m.style.display = (m.style.display==='block') ? 'none' : 'block'; }
     function filter(cat) { render(productos.filter(p => p.cat === cat)); }
+    
     function renderAdmin() {
         document.getElementById('admin-rows').innerHTML = productos.map(p => `
             <tr style="border-bottom:1px solid #eee;">
@@ -289,6 +477,7 @@
             </tr>
         `).join('');
     }
+    
     function del(id) { productos = productos.filter(x => x.id !== id); save(); render(productos); }
 
     updateUserUI();
